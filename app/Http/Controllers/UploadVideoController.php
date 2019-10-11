@@ -20,12 +20,13 @@ class UploadVideoController extends Controller
 
             // store video in storage and save path to db
             'path' => request()->video->store("channels/{$channel->id}")
-//            'path' => request()->video
         ]);
 
-        // 2nd step : ready for streaming
+        // 2nd step : create thumbnail
         $this->dispatch(new ConvertForStreaming($video));
 
+        // 3rd step : ready for streaming
+        $this->dispatch(new ConvertForStreaming($video));
         return $video;
     }
 }
