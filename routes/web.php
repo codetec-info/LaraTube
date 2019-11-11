@@ -2,6 +2,7 @@
 
 
 use Laratube\Http\Controllers\UploadVideoController;
+use Laratube\Http\Controllers\VideoController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -13,6 +14,8 @@ Route::get('/home', 'HomeController@index')->name('home');
 
 Route::resource('channels', 'ChannelController');
 
+Route::get('videos/{video}', [VideoController::class, 'show']);
+Route::put('videos/{video}', [VideoController::class, 'updateViews']);
 
 Route::middleware(['auth'])->group(function () {
 

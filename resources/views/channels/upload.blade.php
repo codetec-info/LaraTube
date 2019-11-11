@@ -11,7 +11,8 @@
                             <path d="M365.26 67.4H95.74A95.74 95.74 0 0 0 0 163.13v134.73a95.74 95.74 0 0 0 95.74 95.74h269.52A95.74 95.74 0 0 0 461 297.87V163.14a95.74 95.74 0 0 0-95.74-95.75zM300.5 237.05l-126.06 60.12a5.06 5.06 0 0 1-7.24-4.57v-124a5.06 5.06 0 0 1 7.34-4.52l126.06 63.88a5.06 5.06 0 0 1-.1 9.09z"
                                   fill="#f61c0d"/>
                         </svg>
-                        <input type="file" id="video-files" name="video-files" ref="videos" class="invisible" @change="upload" multiple
+                        <input type="file" id="video-files" name="video-files" ref="videos" class="invisible"
+                               @change="upload" multiple
                                accept="video/*">
 
                         <p class="text-center">Upload Videos</p>
@@ -20,22 +21,31 @@
                     <div class="card p-3" v-else>
                         <div class="my-4" v-for="video in videos">
                             <div class="progress mb-3">
+                                <!-- we use it for both uploading and processing videos -->
                                 <div class="progress-bar progress-bar-striped progress-bar-animated " role="progressbar"
-                                     :style="{width: `${progress[video.name]}%`}" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100">
+                                     :style="{width: `${video.percentage || progress[video.name]}%`}" aria-valuenow="50"
+                                     aria-valuemin="0" aria-valuemax="100">
+                                    @{{ video.percentage ? (video.percentage===100 ? 'Video Processing completed' :
+                                    'Processing') : 'Uploading' }}
                                 </div>
                             </div>
                             <div class="row">
 
                                 <div class="col-md-4">
-                                    <div
-                                            class="d-flex justify-content-center align-items-center"
-                                            style="height: 180px; color: white; font-size: 18px; background: #808080;">
+                                    <div v-if="!video.thumbnail"
+                                         class="d-flex justify-content-center align-items-center"
+                                         style="height: 180px; color: white; font-size: 18px; background: #808080;">
                                         Loading thumbnail ...
                                     </div>
+                                    <img v-else :src="video.thumbnail" style="width: 100%;" alt="">
                                 </div>
                                 <div class="col-md-4">
-                                    <h4 class="text-center">
-                                        @{{ video.name }}
+                                    <a v-if="video.percentage && video.percentage === 100" target="_blank" :href="`/videos/${video.id}`">
+                                        @{{ video.title }}
+                                    </a>
+                                    <h4 v-else class="text-center">
+                                        <!-- when no title, use name -->
+                                        @{{ video.title || video.name }}
                                     </h4>
 
                                 </div>

@@ -29,7 +29,7 @@ Vue.component('subscribe-button', {
             // If user not authenticated or the channel is for current logged user, then
             // do not allow subscribe/unsubscribe
             if (!__auth() || this.owner)
-                return false
+                return false;
 
             // The !! will return boolean
             return !!this.subscription
@@ -41,7 +41,7 @@ Vue.component('subscribe-button', {
 
         subscription() {
             if (!__auth())
-                return null
+                return null;
 
             return this.subscriptions.find(subscription => subscription.user_id === __auth().id)
         },
@@ -79,4 +79,4 @@ Vue.component('subscribe-button', {
             }
         }
     }
-})
+});

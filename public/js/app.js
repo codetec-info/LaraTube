@@ -33022,6 +33022,7 @@ module.exports = g;
 __webpack_require__(/*! ./bootstrap */ "./resources/js/bootstrap.js");
 
 window.Vue = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.common.js");
+Vue.config.ignoredElements = ['video-js'];
 
 __webpack_require__(/*! ./components/subscribe-button */ "./resources/js/components/subscribe-button.js");
 
@@ -33066,6 +33067,14 @@ if (token) {
 /*! no static exports found */
 /***/ (function(module, exports) {
 
+function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread(); }
+
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance"); }
+
+function _iterableToArray(iter) { if (Symbol.iterator in Object(iter) || Object.prototype.toString.call(iter) === "[object Arguments]") return Array.from(iter); }
+
+function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = new Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } }
+
 Vue.component('channel-uploads', {
   props: {
     channel: {
@@ -33081,7 +33090,9 @@ Vue.component('channel-uploads', {
     return {
       selected: false,
       videos: [],
-      progress: {}
+      progress: {},
+      uploads: [],
+      intervals: {}
     };
   },
   computed: {},
@@ -33089,12 +33100,11 @@ Vue.component('channel-uploads', {
     upload: function upload() {
       var _this = this;
 
-      // console.log(this.$refs)
       this.selected = true; // Get array of files in order to be able to use map
 
       this.videos = Array.from(this.$refs.videos.files); // $.each() {}
 
-      this.videos.map(function (video) {
+      var uploaders = this.videos.map(function (video) {
         var formData = new FormData();
         _this.progress[video.name] = 0;
         formData.append('video', video);
@@ -33109,9 +33119,33 @@ Vue.component('channel-uploads', {
 
             _this.$forceUpdate();
           }
-        }).then(function (response) {// console.log(response.data)
-        })["catch"](function (error) {
+        }).then(function (_ref) {
+          var data = _ref.data;
+          _this.uploads = [].concat(_toConsumableArray(_this.uploads), [data]);
+        })["catch"](function (_ref2) {
+          var error = _ref2.error;
           console.log(error);
+        });
+      }); // To know when all uploads are done
+
+      axios.all(uploaders).then(function () {
+        _this.videos = _this.uploads; // Update video processing until it reach 100%
+
+        _this.videos.forEach(function (video) {
+          _this.intervals[video.id] = setInterval(function () {
+            axios.get("/videos/".concat(video.id)).then(function (_ref3) {
+              var data = _ref3.data;
+
+              if (data.percentage === 100) {
+                clearInterval(_this.intervals[video.id]);
+              }
+
+              _this.videos = _this.videos.map(function (v) {
+                if (v.id === data.id) return data;
+                return v;
+              });
+            });
+          }, 3000); // 3000 = 3 seconds
         });
       });
     }

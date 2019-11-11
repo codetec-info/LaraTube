@@ -4,6 +4,7 @@ namespace Laratube\Http\Controllers;
 
 use Laratube\Channel;
 use Laratube\Jobs\Videos\ConvertForStreaming;
+use Laratube\Jobs\Videos\CreateVideoThumbnail;
 
 class UploadVideoController extends Controller
 {
@@ -22,10 +23,8 @@ class UploadVideoController extends Controller
             'path' => request()->video->store("channels/{$channel->id}")
         ]);
 
-        // This is a test for git push/pull
-
         // 2nd step : create thumbnail
-        $this->dispatch(new ConvertForStreaming($video));
+        $this->dispatch(new CreateVideoThumbnail($video));
 
         // 3rd step : ready for streaming
         $this->dispatch(new ConvertForStreaming($video));
